@@ -55,48 +55,52 @@ RUN mkdir /var/sortsmill \
 	&& git clone https://bitbucket.org/sortsmill/sortsmill-core-guile.git \
 	&& cd sortsmill-core-guile && git checkout 1278d7dac26f3572d && cd .. \
 	&& git clone https://bitbucket.org/sortsmill/sortsmill-tools.git \
-	&& cd sortsmill-tools && git checkout d8f83be51a49d0a6 && cd .. \
+	&& cd sortsmill-tools && git checkout a23820cb5e03f9dfe && cd .. \
 	&& cd /var/sortsmill/build \
 	&& mkdir libunicodenames \
 	&& cd libunicodenames \
 	&& ../../libunicodenames-1.1.0_beta1/configure \
 	&& make \
-	&& make install \
-	&& cd /var/sortsmill/sortsmill-tig \
+	&& make install
+
+RUN cd /var/sortsmill/sortsmill-tig \
 	&& ./autogen.sh \
 	&& mkdir ../build/sortsmill-tig \
 	&& cd ../build/sortsmill-tig \
 	&& ../../sortsmill-tig/configure \
-	&& make install \
-	&& mkdir /var/sortsmill/target \
-	&& cd /var/sortsmill/sortsmill-core \
+	&& make install
+
+RUN cd /var/sortsmill/sortsmill-core \
 	&& ./autogen.sh \
 	&& mkdir ../build/sortsmill-core \
 	&& cd ../build/sortsmill-core \
-	&& ../../sortsmill-core/configure --prefix=/var/sortsmill/target \
+	&& ../../sortsmill-core/configure --prefix=/opt/sortsmill \
 	&& make \
 	&& make install
 
-ENV PKG_CONFIG_PATH /var/sortsmill/target/lib/pkgconfig
+ENV PKG_CONFIG_PATH /opt/sortsmill/lib/pkgconfig
 
-ENV PATH /var/sortsmill/target/bin:$PATH
 
-ENV GUILE_LOAD_PATH /var/sortsmill/target/share/guile/site/2.0
+ENV GUILE_LOAD_PATH /opt/sortsmill/share/guile/site/2.0
 
 
 RUN cd /var/sortsmill/sortsmill-core-guile \
 	&& ./autogen.sh \
 	&& mkdir ../build/sortsmill-core-guile \
 	&& cd ../build/sortsmill-core-guile \
-	&& ../../sortsmill-core-guile/configure --prefix=/var/sortsmill/target \
+	&& ../../sortsmill-core-guile/configure --prefix=/opt/sortsmill \
 	&& make \
 	&& make install
+
+ENV PATH /opt/sortsmill/bin:$PATH
+
+ENV GUILE_LOAD_PATH /opt/sortsmill/share/sortsmill/guile/site/2.0:$GUILE_LOAD_PATH
 	
 RUN cd /var/sortsmill/sortsmill-tools \
 	&& ./autogen.sh \
 	&& mkdir ../build/sortsmill-tools \
 	&& cd ../build/sortsmill-tools \
-	&& ../../sortsmill-tools/configure --prefix=/var/sortsmill/target \
+	&& ../../sortsmill-tools/configure --prefix=/opt/sortsmill \
 	&& make \
 	&& make install
 
