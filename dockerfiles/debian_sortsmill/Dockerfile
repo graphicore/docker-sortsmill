@@ -1,6 +1,5 @@
 FROM debian/jessie
 
-
 RUN apt-get update && apt-get install -y \
 	build-essential \
 	git \
@@ -13,20 +12,20 @@ RUN apt-get update && apt-get install -y \
 	libmonoboehm-2.0-dev \
 	libunistring0 \
 	libunistring-dev \
-	libgsl0-dev python-gmpy \
+	libgsl0-dev  \
+	python-gmpy \
 	cython \
 	gpp \
-	ant \
 	autoconf \
 	intltool \
 	libpcre3 \
 	libpcre3-dev \
 	libtool \
 	gawk \
-	wget \
 	libgettextpo0 \
 	libgettextpo-dev \
-	vim libglib2.0-dev \
+	vim \
+	libglib2.0-dev \
 	libpng12-0 \
 	libpng12-dev \
 	libxml2 \
@@ -40,17 +39,18 @@ RUN apt-get update && apt-get install -y \
 	libpango1.0-dev \
 	libpango1.0-0 \
 	libxcursor-dev \
-     && rm -rf /var/lib/apt/lists/*
+	&& rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /var/sortsmill \
 	&& cd /var/sortsmill \
-	&& mkdir build \
-        && git clone git://git.sv.gnu.org/gnulib.git \
-        && ln -s `pwd`/gnulib/gnulib-tool /usr/local/bin/ \
-        && git clone https://bitbucket.org/sortsmill/sortsmill-tig.git \
+	&& git clone git://git.sv.gnu.org/gnulib.git \
+	&& ln -s `pwd`/gnulib/gnulib-tool /usr/local/bin/ \
+	&& git clone https://bitbucket.org/sortsmill/sortsmill-tig.git \
 	&& git clone https://bitbucket.org/sortsmill/sortsmill-core.git
 
-COPY libunicodenames-1.1.0_beta1.tar.xz /var/sortsmill/
+
+ADD https://bitbucket.org/sortsmill/libunicodenames/downloads/libunicodenames-1.1.0_beta1.tar.xz  /var/sortsmill/
+
 RUN cd /var/sortsmill \
 	&& tar xf libunicodenames-1.1.0_beta1.tar.xz
 
@@ -58,7 +58,7 @@ RUN cd /var/sortsmill \
 	&& git clone https://bitbucket.org/sortsmill/sortsmill-core-guile.git \
 	&& git clone https://bitbucket.org/sortsmill/sortsmill-tools.git
 
-RUN	cd /var/sortsmill/libunicodenames-1.1.0_beta1 \
+RUN cd /var/sortsmill/libunicodenames-1.1.0_beta1 \
 	&& mkdir .build \
 	&& cd .build \
 	&& ../configure \
@@ -100,14 +100,16 @@ RUN cd /var/sortsmill/sortsmill-tools \
 	&& ../configure \
 	&& make \
 	&& make install
-
-RUN ldconfig
+	&& ldconfig
 
 ENV  PYTHONPATH /usr/local/lib/python2.7/site-packages/
 
 ENV GUILE_LOAD_PATH /usr/local/share/guile/site/2.0:$GUILE_LOAD_PATH
 
-# it's nice to have all guile files precompiled already
+ENV LD_LIBRARY_PATH /usr/local/lib:$LD_LIBRARY_PATH
+
+# It's nice to have all as many as possible guile files precompiled
+# because this will become the state of the container.
 RUN find /usr/local/ -name *.scm -exec guild compile {} \; \
 	&& python -c "import sortsmill"
 
