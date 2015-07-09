@@ -25,7 +25,7 @@ There are currently two supported Gnu/Linux distrubutions:
 
 If you are interested in what you need to compile Sortsmill for your
 system, the files `dockerfiles/arch_sortsmill/Dockerfile` and
-`dockerfiles/arch_debian/Dockerfile` should give you a good understanding.
+`dockerfiles/debian_sortsmill/Dockerfile` should give you a good understanding.
 [Dockerfile Reference](https://docs.docker.com/reference/builder/)
 
 ## Builds
