@@ -41,66 +41,88 @@ RUN apt-get update && apt-get install -y \
 	libxcursor-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /var/sortsmill \
-	&& cd /var/sortsmill \
+RUN mkdir -p /var/build \
+	&& cd /var/build \
+	&& echo "Versions used:" > versions.txt
+
+RUN cd /var/build \
 	&& git clone git://git.sv.gnu.org/gnulib.git \
 	&& ln -s `pwd`/gnulib/gnulib-tool /usr/local/bin/ \
-	&& git clone https://bitbucket.org/sortsmill/sortsmill-tig.git \
-	&& git clone https://bitbucket.org/sortsmill/sortsmill-core.git
+	&& cd gnulib \
+	&& echo `git config --get remote.origin.url` at `git rev-parse HEAD` >> /var/build/versions.txt
 
+ADD https://bitbucket.org/sortsmill/libunicodenames/downloads/libunicodenames-1.1.0_beta1.tar.xz  /var/build/
 
-ADD https://bitbucket.org/sortsmill/libunicodenames/downloads/libunicodenames-1.1.0_beta1.tar.xz  /var/sortsmill/
-
-RUN cd /var/sortsmill \
-	&& tar xf libunicodenames-1.1.0_beta1.tar.xz
-
-RUN cd /var/sortsmill \
-	&& git clone https://bitbucket.org/sortsmill/sortsmill-core-guile.git \
-	&& git clone https://bitbucket.org/sortsmill/sortsmill-tools.git
-
-RUN cd /var/sortsmill/libunicodenames-1.1.0_beta1 \
+RUN cd /var/build \
+	&& tar xf libunicodenames-1.1.0_beta1.tar.xz \
+	&& cd /var/build/libunicodenames-1.1.0_beta1 \
 	&& mkdir .build \
 	&& cd .build \
 	&& ../configure \
 	&& make \
-	&& make install
-	&& ldconfig
+	&& make install \
+	&& ldconfig \
+	&& cd /var/build \
+	&& rm -rf libunicodenames-1.1.0_beta1
 
-RUN cd /var/sortsmill/sortsmill-tig \
+RUN cd /var/build/ \
+	&& git clone https://bitbucket.org/sortsmill/sortsmill-tig.git \
+	&& cd sortsmill-tig \
+	&& echo `git config --get remote.origin.url` at `git rev-parse HEAD` >> /var/build/versions.txt \
 	&& ./autogen.sh \
 	&& mkdir .build \
 	&& cd .build \
 	&& ../configure \
-	&& make install
+	&& make install \
+	&& cd /var/build \
+	&& rm -rf sortsmill-tig
 
 ENV PKG_CONFIG_PATH /usr/local/lib/pkgconfig
 
-RUN cd /var/sortsmill/sortsmill-core \
+RUN cd /var/build \
+	&& git clone https://bitbucket.org/sortsmill/sortsmill-core.git \
+	&& cd sortsmill-core \
+	&& echo `git config --get remote.origin.url` at `git rev-parse HEAD` >> /var/build/versions.txt \
 	&& ./autogen.sh \
 	&& mkdir .build \
 	&& cd .build \
 	&& ../configure \
 	&& make \
 	&& make install \
-	&& ldconfig
+	&& ldconfig \
+	&& cd /var/build \
+	&& rm -rf sortsmill-core
 
-RUN cd /var/sortsmill/sortsmill-core-guile \
+RUN cd /var/build \
+	&& git clone https://bitbucket.org/sortsmill/sortsmill-core-guile.git \
+	&& cd sortsmill-core-guile \
+	&& echo `git config --get remote.origin.url` at `git rev-parse HEAD` >> /var/build/versions.txt \
 	&& ./autogen.sh \
 	&& mkdir .build \
 	&& cd .build \
 	&& ../configure \
 	&& make \
 	&& make install \
-	&& ldconfig
+	&& ldconfig \
+	&& cd /var/build \
+	&& rm -rf sortsmill-core-guile
 
-RUN cd /var/sortsmill/sortsmill-tools \
+RUN cd /var/build \
+	&& git clone https://bitbucket.org/sortsmill/sortsmill-tools.git \
+	&& cd sortsmill-tools \
+	&& echo `git config --get remote.origin.url` at `git rev-parse HEAD` >> /var/build/versions.txt \
 	&& ./autogen.sh \
 	&& mkdir .build \
 	&& cd .build \
 	&& ../configure \
 	&& make \
-	&& make install
-	&& ldconfig
+	&& make install \
+	&& ldconfig \
+	&& \
+	   # see: https://github.com/docker/docker/issues/13451
+	   mv confdir3/confdir3/confdir3/confdir3/confdir3/ deleteable \
+	&& cd /var/build \
+	&& rm -rf sortsmill-tools
 
 ENV  PYTHONPATH /usr/local/lib/python2.7/site-packages/
 
